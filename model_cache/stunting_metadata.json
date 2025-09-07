@@ -1,0 +1,16 @@
+{
+  "algorithm": "SVM (Linear Kernel)",
+  "n_features": 3,
+  "n_classes": 4,
+  "available_classes": [
+    "normal",
+    "severely stunted",
+    "stunted",
+    "tinggi"
+  ],
+  "gender_mapping": {
+    "laki-laki": 1,
+    "perempuan": 0
+  },
+  "cache_timestamp": "2025-09-04T10:41:55.212165"
+}

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: stunting_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: stunting_db
+      MYSQL_USER: stunting_user
+      MYSQL_PASSWORD: stunting_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - stunting_network
+
+  app:
+    build: .
+    container_name: stunting_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=mysql+pymysql://stunting_user:stunting_password@mysql:3306/stunting_db
+      - SECRET_KEY=your-secret-key-here-make-it-long-and-secure
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - DEBUG=True
+      - HOST=0.0.0.0
+      - PORT=8000
+    depends_on:
+      - mysql
+    networks:
+      - stunting_network
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  mysql_data:
+
+networks:
+  stunting_network:
+    driver: bridge

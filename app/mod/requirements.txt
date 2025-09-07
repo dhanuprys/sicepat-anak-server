@@ -1,0 +1,31 @@
+# Requirements untuk Aplikasi Prediksi Stunting dengan SVM
+# File ini berisi semua dependensi yang diperlukan untuk menjalankan indexok.py dan Multiclass.py
+
+# Data manipulation dan analysis
+pandas>=1.5.0
+
+# Machine learning library
+scikit-learn>=1.1.0
+
+# Numerical computing (untuk Multiclass.py)
+numpy>=1.21.0
+
+# Excel file reading (untuk membaca data_balita.xlsx)
+openpyxl>=3.0.0
+
+# Model persistence (untuk save/load model)
+joblib>=1.1.0
+
+# Web frameworks (pilih salah satu atau semua sesuai kebutuhan)
+flask>=2.0.0
+fastapi>=0.68.0
+uvicorn[standard]>=0.15.0
+django>=3.2.0
+
+# HTTP client untuk testing API
+requests>=2.25.0
+
+# Data validation (untuk FastAPI)
+pydantic>=1.8.0
+
+# Note: tkinter sudah built-in dengan Python, tidak perlu diinstall secara terpisah
