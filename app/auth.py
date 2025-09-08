@@ -2,8 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
@@ -13,8 +12,7 @@ from app.schemas import TokenData
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# JWT token scheme
-security = HTTPBearer()
+# JWT token scheme - using custom header instead of Bearer
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -45,7 +43,6 @@ def verify_token(token: str) -> TokenData:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
     )
     
     try:
@@ -61,11 +58,16 @@ def verify_token(token: str) -> TokenData:
 
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    token: str = Header(..., alias="token"),
     db: Session = Depends(get_db)
 ) -> User:
-    """Get current authenticated user"""
-    token = credentials.credentials
+    """Get current authenticated user from token header"""
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token header is required",
+        )
+    
     token_data = verify_token(token)
     
     user = db.query(User).filter(User.username == token_data.username).first()
@@ -73,7 +75,6 @@ def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
         )
     
     return user
