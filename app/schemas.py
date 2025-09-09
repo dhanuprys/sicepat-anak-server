@@ -55,6 +55,12 @@ class DiagnoseHistoryBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     
+    @validator('username', 'name', 'address', 'password')
+    def trim_strings(cls, v):
+        if isinstance(v, str):
+            return v.strip()
+        return v
+    
     @validator('password')
     def validate_password(cls, v):
         if len(v) < 6:
@@ -63,7 +69,11 @@ class UserCreate(UserBase):
 
 
 class ChildrenCreate(ChildrenBase):
-    pass
+    @validator('name')
+    def trim_name(cls, v):
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
 
 class DiagnoseHistoryCreate(BaseModel):
@@ -92,12 +102,24 @@ class UserUpdate(BaseModel):
     address: Optional[str] = None
     dob: Optional[date] = None
     gender: Optional[str] = None
+    
+    @validator('name', 'username', 'address')
+    def trim_strings(cls, v):
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
 
 class ChildrenUpdate(BaseModel):
     name: Optional[str] = None
     gender: Optional[str] = None
     dob: Optional[date] = None
+    
+    @validator('name')
+    def trim_name(cls, v):
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
 
 # Response schemas
@@ -136,6 +158,12 @@ class DiagnoseResult(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+    
+    @validator('username', 'password')
+    def trim_strings(cls, v):
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
 
 class UserRegister(UserCreate):
