@@ -118,9 +118,10 @@ def generate_diagnose_report_endpoint(
         # Generate PDF report
         pdf_service = PDFReportService()
         filename = pdf_service.generate_diagnose_report(
-            diagnose=diagnose,
-            children=children,
-            user=children.user  # Get user from children relationship
+            db=db,
+            diagnose_id=diagnose_id,
+            children_id=children_id,
+            user_id=children.user_id  # Get user_id from children
         )
         
         download_url = pdf_service.get_report_url(filename)
