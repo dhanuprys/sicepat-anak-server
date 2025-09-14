@@ -100,8 +100,8 @@ def generate_diagnose_report_endpoint(
             )
         
         # Verify children exists
-        from app.crud import get_children_by_id
-        children = get_children_by_id(db, children_id)
+        from app.crud import get_children_by_id_admin
+        children = get_children_by_id_admin(db, children_id)
         if not children:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
