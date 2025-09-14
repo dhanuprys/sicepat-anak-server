@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app.api import auth, profile, children, diagnose
 from app.database import engine
@@ -38,6 +39,9 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(profile.router, prefix="/api")
 app.include_router(children.router, prefix="/api")
 app.include_router(diagnose.router, prefix="/api")
+
+# Mount static files for reports
+app.mount("/reports", StaticFiles(directory="reports"), name="reports")
 
 
 @app.get("/")

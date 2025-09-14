@@ -1,3 +1,10 @@
+test_api.py
+test_predictor.py
+run_all_tests.sh
+test_api_example.py
+test_predictor_example.py
+run_all_tests_example.sh
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -137,3 +144,6 @@ dmypy.json
 # OS
 .DS_Store
 Thumbs.db
+
+# PDF Reports
+reports/

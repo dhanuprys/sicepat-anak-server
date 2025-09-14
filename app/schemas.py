@@ -11,6 +11,7 @@ class UserBase(BaseModel):
     address: Optional[str] = None
     dob: date
     gender: str
+    is_admin: Optional[bool] = False
 
 
 class ChildrenBase(BaseModel):
@@ -102,6 +103,7 @@ class UserUpdate(BaseModel):
     address: Optional[str] = None
     dob: Optional[date] = None
     gender: Optional[str] = None
+    is_admin: Optional[bool] = None
     
     @validator('name', 'username', 'address')
     def trim_strings(cls, v):
@@ -173,6 +175,12 @@ class UserRegister(UserCreate):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserResponse
 
 
 class TokenData(BaseModel):

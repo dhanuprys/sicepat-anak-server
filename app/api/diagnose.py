@@ -10,6 +10,7 @@ from app.crud import (
 from app.predictor import get_predictor, is_predictor_ready
 from app.models import User
 from app.schemas import DiagnoseHistoryCreate, DiagnoseHistoryResponse, DiagnoseResult
+from app.services.pdf_service import pdf_service
 
 router = APIRouter(prefix="/children", tags=["diagnose"])
 
@@ -82,6 +83,70 @@ def create_diagnose(
     diagnose = create_diagnose_history(db, diagnose_dict, children_id)
     
     return diagnose
+
+
+@router.get("/{children_id}/diagnose/{diagnose_id}/report")
+def generate_diagnose_report(
+    children_id: int,
+    diagnose_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Generate PDF report for specific diagnose (Admin only)"""
+    # Check if user is admin
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Admin privileges required to generate reports."
+        )
+    
+    try:
+        # Verify children belongs to current user
+        children = get_children_by_id(db, children_id, current_user.id)
+        if not children:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Children not found"
+            )
+        
+        # Verify diagnose exists and belongs to the children
+        diagnose = get_diagnose_history_by_id(db, diagnose_id, children_id)
+        if not diagnose:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Diagnose not found"
+            )
+        
+        # Generate PDF report
+        pdf_filepath = pdf_service.generate_diagnose_report(
+            db=db,
+            diagnose_id=diagnose_id,
+            children_id=children_id,
+            user_id=current_user.id
+        )
+        
+        # Generate download URL
+        download_url = pdf_service.get_report_url(pdf_filepath)
+        
+        return {
+            "message": "PDF report generated successfully",
+            "download_url": download_url,
+            "filename": pdf_filepath.split("/")[-1],
+            "diagnose_id": diagnose_id,
+            "children_id": children_id
+        }
+        
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        print(f"❌ Error generating PDF report: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate PDF report: {str(e)}"
+        )
 
 
 @router.get("/{children_id}/diagnose", response_model=List[DiagnoseHistoryResponse])

@@ -15,14 +15,25 @@
 
 ### **JWT Token Format**
 ```
-Authorization: Bearer <access_token>
+token: <access_token>
 ```
 
 ### **Token Response Format**
 ```json
 {
   "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-  "token_type": "bearer"
+  "token_type": "bearer",
+  "user": {
+    "id": 1,
+    "avatar_type": 1,
+    "name": "string",
+    "username": "string",
+    "address": "string",
+    "dob": "YYYY-MM-DD",
+    "gender": "string",
+    "is_admin": false,
+    "registration_date": "YYYY-MM-DDTHH:MM:SS"
+  }
 }
 ```
 
@@ -47,7 +58,18 @@ Authorization: Bearer <access_token>
 ```json
 {
   "access_token": "string",
-  "token_type": "bearer"
+  "token_type": "bearer",
+  "user": {
+    "id": 1,
+    "avatar_type": 1,
+    "name": "string",
+    "username": "string",
+    "address": "string",
+    "dob": "YYYY-MM-DD",
+    "gender": "string",
+    "is_admin": false,
+    "registration_date": "YYYY-MM-DDTHH:MM:SS"
+  }
 }
 ```
 
@@ -83,6 +105,7 @@ Authorization: Bearer <access_token>
   "address": "string",
   "dob": "YYYY-MM-DD",
   "gender": "string",
+  "is_admin": false,
   "registration_date": "YYYY-MM-DDTHH:MM:SS"
 }
 ```
@@ -98,7 +121,7 @@ Authorization: Bearer <access_token>
 #### **GET** `/api/profile`
 **Description**: Get current user profile information
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Response** (200 OK):
 ```json
@@ -110,6 +133,7 @@ Authorization: Bearer <access_token>
   "address": "string",
   "dob": "YYYY-MM-DD",
   "gender": "string",
+  "is_admin": false,
   "registration_date": "YYYY-MM-DDTHH:MM:SS"
 }
 ```
@@ -122,7 +146,7 @@ Authorization: Bearer <access_token>
 #### **PUT** `/api/profile`
 **Description**: Update profile user
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Request Body**:
 ```json
@@ -146,6 +170,7 @@ Authorization: Bearer <access_token>
   "address": "string",
   "dob": "YYYY-MM-DD",
   "gender": "string",
+  "is_admin": false,
   "registration_date": "YYYY-MM-DDTHH:MM:SS"
 }
 ```
@@ -160,7 +185,7 @@ Authorization: Bearer <access_token>
 #### **PUT** `/api/profile/change-password`
 **Description**: Ganti password user
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Request Body**:
 ```json
@@ -188,7 +213,7 @@ Authorization: Bearer <access_token>
 #### **POST** `/api/children`
 **Description**: Buat data anak baru
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Request Body**:
 ```json
@@ -221,7 +246,7 @@ Authorization: Bearer <access_token>
 #### **GET** `/api/children`
 **Description**: Dapatkan semua data anak user
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Response** (200 OK):
 ```json
@@ -246,7 +271,7 @@ Authorization: Bearer <access_token>
 #### **GET** `/api/children/{children_id}`
 **Description**: Dapatkan detail anak berdasarkan ID
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Path Parameters**:
 - `children_id`: ID anak (integer)
@@ -273,7 +298,7 @@ Authorization: Bearer <access_token>
 #### **PUT** `/api/children/{children_id}`
 **Description**: Update data anak
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Path Parameters**:
 - `children_id`: ID anak (integer)
@@ -310,7 +335,7 @@ Authorization: Bearer <access_token>
 #### **DELETE** `/api/children/{children_id}`
 **Description**: Hapus data anak
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Path Parameters**:
 - `children_id`: ID anak (integer)
@@ -333,7 +358,7 @@ Authorization: Bearer <access_token>
 #### **POST** `/api/children/{children_id}/diagnose`
 **Description**: Buat diagnosa stunting baru untuk anak
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Path Parameters**:
 - `children_id`: ID anak (integer)
@@ -372,7 +397,7 @@ Authorization: Bearer <access_token>
 #### **GET** `/api/children/{children_id}/diagnose`
 **Description**: Dapatkan semua riwayat diagnosa anak
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Path Parameters**:
 - `children_id`: ID anak (integer)
@@ -402,7 +427,7 @@ Authorization: Bearer <access_token>
 #### **GET** `/api/children/{children_id}/diagnose/{diagnose_id}`
 **Description**: Dapatkan detail diagnosa berdasarkan ID
 
-**Headers**: `Authorization: Bearer <token>`
+**Headers**: `token: <access_token>`
 
 **Path Parameters**:
 - `children_id`: ID anak (integer)
@@ -424,6 +449,57 @@ Authorization: Bearer <access_token>
 **Error Responses**:
 - `401 Unauthorized`: Token tidak valid
 - `404 Not Found`: Anak atau diagnosa tidak ditemukan
+
+---
+
+#### **GET** `/api/children/{children_id}/diagnose/{diagnose_id}/report`
+**Description**: Generate PDF report untuk diagnosa spesifik (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `children_id`: ID anak (integer)
+- `diagnose_id`: ID diagnosa (integer)
+
+**Response** (200 OK):
+```json
+{
+  "message": "PDF report generated successfully",
+  "download_url": "http://localhost:8000/reports/diagnose_report_1_20250913_123456_abc12345.pdf",
+  "filename": "diagnose_report_1_20250913_123456_abc12345.pdf",
+  "diagnose_id": 1,
+  "children_id": 1
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: Anak atau diagnosa tidak ditemukan
+- `500 Internal Server Error`: Gagal generate PDF report
+
+**PDF Report Format**:
+```
+SURAT KETERANGAN HASIL DIAGNOSA
+Nomor: 000001
+
+Menerangkan bahwa:
+1. Nama Pasien : [Nama Anak]
+2. Jenis Kelamin : [Laki-laki/Perempuan]
+3. Alamat : [Alamat User]
+
+Telah diperiksa pada tanggal [Tanggal Diagnosa] dengan hasil pemeriksaan sebagai berikut:
+
+Data Pemeriksaan :
+1. Umur : [X] bulan
+2. Berat Badan : Tidak diukur
+3. Tinggi Badan : [X] cm
+
+Diagnosa Medis :
+[Normal/Stunted/Severely Stunted/Tinggi]
+```
 
 ---
 
@@ -499,6 +575,7 @@ Authorization: Bearer <access_token>
   dob: date (YYYY-MM-DD)
   gender: string
   password: string (min 6 chars)
+  is_admin: boolean (nullable, default: false)
   registration_date: datetime
 }
 ```

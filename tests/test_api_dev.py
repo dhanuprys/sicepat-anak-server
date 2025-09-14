@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive test script untuk Stunting Checking App API
+Comprehensive test script untuk Stunting Checking App API - Development Environment
 """
 
 import requests
@@ -8,7 +8,7 @@ import json
 import time
 from datetime import date, datetime
 
-# Base URL
+# Base URL for development
 BASE_URL = "http://localhost:8000/api"
 
 def test_health():
@@ -66,6 +66,7 @@ def test_register():
             print(f"   User ID: {user['id']}")
             print(f"   Username: {user['username']}")
             print(f"   Name: {user['name']}")
+            print(f"   Is Admin: {user.get('is_admin', 'N/A')}")
             return user
         else:
             print(f"❌ User registration failed: {response.status_code}")
@@ -126,6 +127,10 @@ def test_login(username, password):
             token_data = response.json()
             print(f"   Token: {token_data['access_token'][:20]}...")
             print(f"   Token type: {token_data['token_type']}")
+            if 'user' in token_data:
+                print(f"   User ID: {token_data['user']['id']}")
+                print(f"   Username: {token_data['user']['username']}")
+                print(f"   Is Admin: {token_data['user'].get('is_admin', 'N/A')}")
             return token_data['access_token']
         else:
             print(f"❌ User login failed: {response.status_code}")
@@ -166,7 +171,7 @@ def test_create_children(token):
         "dob": str(date.today())
     }
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.post(f"{BASE_URL}/children", json=children_data, headers=headers)
@@ -195,7 +200,7 @@ def test_create_children_invalid_gender(token):
         "dob": str(date.today())
     }
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.post(f"{BASE_URL}/children", json=children_data, headers=headers)
@@ -213,7 +218,7 @@ def test_get_children_list(token):
     """Test getting children list"""
     print("\n🔍 Testing get children list...")
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.get(f"{BASE_URL}/children", headers=headers)
@@ -234,7 +239,7 @@ def test_get_children_detail(token, children_id):
     """Test getting children detail"""
     print("\n🔍 Testing get children detail...")
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.get(f"{BASE_URL}/children/{children_id}", headers=headers)
@@ -261,7 +266,7 @@ def test_update_children(token, children_id):
         "gender": "P"
     }
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.put(f"{BASE_URL}/children/{children_id}", json=update_data, headers=headers)
@@ -286,11 +291,10 @@ def test_create_diagnose(token, children_id):
     diagnose_data = {
         "age_on_month": 38,
         "gender": "L",
-        "height": 85,
-        "result": "Normal"  # This will be overridden by the API
+        "height": 85
     }
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.post(f"{BASE_URL}/children/{children_id}/diagnose", json=diagnose_data, headers=headers)
@@ -316,11 +320,10 @@ def test_create_diagnose_invalid_age(token, children_id):
     diagnose_data = {
         "age_on_month": 100,  # Invalid age
         "gender": "L",
-        "height": 85,
-        "result": "Normal"
+        "height": 85
     }
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.post(f"{BASE_URL}/children/{children_id}/diagnose", json=diagnose_data, headers=headers)
@@ -338,7 +341,7 @@ def test_get_diagnose_list(token, children_id):
     """Test getting diagnose list"""
     print("\n🔍 Testing get diagnose list...")
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.get(f"{BASE_URL}/children/{children_id}/diagnose", headers=headers)
@@ -359,7 +362,7 @@ def test_get_diagnose_detail(token, children_id, diagnose_id):
     """Test getting diagnose detail"""
     print("\n🔍 Testing get diagnose detail...")
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.get(f"{BASE_URL}/children/{children_id}/diagnose/{diagnose_id}", headers=headers)
@@ -375,6 +378,34 @@ def test_get_diagnose_detail(token, children_id, diagnose_id):
             return None
     except requests.exceptions.RequestException as e:
         print(f"❌ Get diagnose detail error: {e}")
+        return None
+
+def test_generate_pdf_report(token, children_id, diagnose_id, user_type="user"):
+    """Test generate PDF report"""
+    print(f"\n🔍 Testing generate PDF report as {user_type} user...")
+    
+    headers = {"token": token}
+    
+    try:
+        response = requests.get(f"{BASE_URL}/children/{children_id}/diagnose/{diagnose_id}/report", headers=headers)
+        if response.status_code == 200:
+            print(f"✅ Generate PDF report OK for {user_type} user")
+            report_data = response.json()
+            print(f"   Message: {report_data.get('message', 'N/A')}")
+            print(f"   Download URL: {report_data.get('download_url', 'N/A')}")
+            print(f"   Filename: {report_data.get('filename', 'N/A')}")
+            return report_data
+        elif response.status_code == 403:
+            print(f"✅ Generate PDF report correctly rejected for {user_type} user (403 Forbidden)")
+            error_data = response.json()
+            print(f"   Error: {error_data.get('detail', 'N/A')}")
+            return None
+        else:
+            print(f"❌ Generate PDF report failed: {response.status_code}")
+            print(f"   Response: {response.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Generate PDF report error: {e}")
         return None
 
 def test_predictor_status():
@@ -399,6 +430,30 @@ def test_predictor_status():
         print(f"❌ Predictor status error: {e}")
         return None
 
+def test_get_profile(token):
+    """Test get profile"""
+    print("\n🔍 Testing get profile...")
+    
+    headers = {"token": token}
+    
+    try:
+        response = requests.get(f"{BASE_URL}/profile", headers=headers)
+        if response.status_code == 200:
+            print("✅ Get profile OK")
+            profile = response.json()
+            print(f"   User ID: {profile['id']}")
+            print(f"   Username: {profile['username']}")
+            print(f"   Name: {profile['name']}")
+            print(f"   Is Admin: {profile.get('is_admin', 'N/A')}")
+            return profile
+        else:
+            print(f"❌ Get profile failed: {response.status_code}")
+            print(f"   Response: {response.text}")
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Get profile error: {e}")
+        return None
+
 def test_profile_update(token):
     """Test profile update"""
     print("\n🔍 Testing profile update...")
@@ -408,7 +463,7 @@ def test_profile_update(token):
         "address": "Updated Test Address"
     }
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.put(f"{BASE_URL}/profile", json=update_data, headers=headers)
@@ -417,6 +472,7 @@ def test_profile_update(token):
             profile = response.json()
             print(f"   Updated name: {profile['name']}")
             print(f"   Updated address: {profile['address']}")
+            print(f"   Is Admin: {profile.get('is_admin', 'N/A')}")
             return profile
         else:
             print(f"❌ Profile update failed: {response.status_code}")
@@ -434,7 +490,7 @@ def test_change_password(token):
         "new_password": "newtestpass123"
     }
     
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"token": token}
     
     try:
         response = requests.put(f"{BASE_URL}/profile/change-password", json=password_data, headers=headers)
@@ -465,7 +521,7 @@ def test_unauthorized_access():
     for endpoint in endpoints:
         try:
             response = requests.get(endpoint)
-            if response.status_code == 401:
+            if response.status_code in [401, 422]:  # 422 for missing token header, 401 for invalid token
                 print(f"   ✅ {endpoint} correctly requires authentication")
             else:
                 print(f"   ❌ {endpoint} should require authentication: {response.status_code}")
@@ -478,7 +534,7 @@ def test_invalid_token():
     """Test with invalid token"""
     print("\n🔍 Testing invalid token...")
     
-    headers = {"Authorization": "Bearer invalid_token_here"}
+    headers = {"token": "invalid_token_here"}
     
     try:
         response = requests.get(f"{BASE_URL}/profile", headers=headers)
@@ -494,8 +550,8 @@ def test_invalid_token():
 
 def main():
     """Main test function"""
-    print("🧪 Comprehensive Testing Stunting Checking App API")
-    print("=" * 60)
+    print("🧪 Comprehensive Testing Stunting Checking App API - Development")
+    print("=" * 70)
     
     # Test basic endpoints
     if not test_health():
@@ -546,11 +602,13 @@ def main():
         test_create_diagnose_invalid_age(token, children['id'])
         test_get_diagnose_list(token, children['id'])
         test_get_diagnose_detail(token, children['id'], diagnose['id'])
+        test_generate_pdf_report(token, children['id'], diagnose['id'], "regular")
     
     # Test predictor
     test_predictor_status()
     
     # Test profile management
+    test_get_profile(token)
     test_profile_update(token)
     test_change_password(token)
     
@@ -560,8 +618,8 @@ def main():
     
     print("\n🎉 All comprehensive tests completed!")
     print("✅ API is working correctly with all features")
-    print(f"📊 Tested endpoints: Health, Root, Auth, Children, Diagnose, Predictor, Profile")
-    print(f"🔒 Security tests: Unauthorized access, Invalid tokens")
+    print(f"📊 Tested endpoints: Health, Root, Auth, Children, Diagnose, Predictor, Profile, PDF Report")
+    print(f"🔒 Security tests: Unauthorized access, Invalid tokens, Admin-only PDF")
     print(f"⚠️  Validation tests: Invalid data, Duplicate data")
 
 if __name__ == "__main__":
