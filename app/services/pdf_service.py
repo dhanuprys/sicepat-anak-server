@@ -17,11 +17,13 @@ from reportlab.pdfbase.ttfonts import TTFont
 from sqlalchemy.orm import Session
 from app.models import DiagnoseHistory, Children, User
 from app.crud import get_diagnose_history_by_id, get_children_by_id
+from app.config import settings
 
 
 class PDFReportService:
     def __init__(self):
-        self.reports_dir = "reports"
+        self.reports_dir = settings.REPORTS_DIR
+        self.base_url = settings.BASE_URL
         self.ensure_reports_directory()
     
     def ensure_reports_directory(self):
@@ -178,19 +180,18 @@ class PDFReportService:
         
         return filepath
     
-    def get_report_url(self, filepath: str, base_url: str = "http://localhost:8000") -> str:
+    def get_report_url(self, filepath: str) -> str:
         """
         Generate download URL for the report
         
         Args:
             filepath: Path to the PDF file
-            base_url: Base URL of the application
             
         Returns:
             str: Download URL
         """
         filename = os.path.basename(filepath)
-        return f"{base_url}/reports/{filename}"
+        return f"{self.base_url}/reports/{filename}"
 
 
 # Global instance

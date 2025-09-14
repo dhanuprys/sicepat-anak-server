@@ -6,6 +6,7 @@ from app.api import auth, profile, children, diagnose, users, users_children, us
 from app.database import engine
 from app.models import Base
 from app.predictor import initialize_predictor
+from app.config import settings
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -28,7 +29,7 @@ app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this properly for production
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,7 +47,7 @@ app.include_router(users_children.router, prefix="/api/users/children", tags=["A
 app.include_router(users_diagnose.router, prefix="/api/users/diagnose", tags=["Admin - Diagnose"])
 
 # Mount static files for reports
-app.mount("/reports", StaticFiles(directory="reports"), name="reports")
+app.mount("/reports", StaticFiles(directory=settings.REPORTS_DIR), name="reports")
 
 
 @app.get("/")
