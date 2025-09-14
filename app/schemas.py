@@ -70,6 +70,8 @@ class UserCreate(UserBase):
 
 
 class ChildrenCreate(ChildrenBase):
+    user_id: Optional[int] = None  # Optional for regular users, required for admin
+    
     @validator('name')
     def trim_name(cls, v):
         if isinstance(v, str):

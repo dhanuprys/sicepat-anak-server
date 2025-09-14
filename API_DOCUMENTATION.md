@@ -453,11 +453,9 @@ token: <access_token>
 ---
 
 #### **GET** `/api/children/{children_id}/diagnose/{diagnose_id}/report`
-**Description**: Generate PDF report untuk diagnosa spesifik (Admin only)
+**Description**: Generate PDF report untuk diagnosa spesifik
 
 **Headers**: `token: <access_token>`
-
-**Authorization**: Requires admin privileges (`is_admin: true`)
 
 **Path Parameters**:
 - `children_id`: ID anak (integer)
@@ -476,7 +474,6 @@ token: <access_token>
 
 **Error Responses**:
 - `401 Unauthorized`: Token tidak valid
-- `403 Forbidden`: Admin privileges required
 - `404 Not Found`: Anak atau diagnosa tidak ditemukan
 - `500 Internal Server Error`: Gagal generate PDF report
 
@@ -503,7 +500,519 @@ Diagnosa Medis :
 
 ---
 
-### **5. ML Predictor Status (Public)**
+### **5. Admin Management (Admin Only)**
+
+#### **GET** `/api/users/`
+**Description**: Get all users (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": 1,
+    "avatar_type": 1,
+    "name": "string",
+    "username": "string",
+    "address": "string",
+    "dob": "YYYY-MM-DD",
+    "gender": "string",
+    "is_admin": false,
+    "registration_date": "YYYY-MM-DDTHH:MM:SS"
+  }
+]
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+
+---
+
+#### **GET** `/api/users/{user_id}`
+**Description**: Get user by ID (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `user_id`: ID user (integer)
+
+**Response** (200 OK):
+```json
+{
+  "id": 1,
+  "avatar_type": 1,
+  "name": "string",
+  "username": "string",
+  "address": "string",
+  "dob": "YYYY-MM-DD",
+  "gender": "string",
+  "is_admin": false,
+  "registration_date": "YYYY-MM-DDTHH:MM:SS"
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: User tidak ditemukan
+
+---
+
+#### **PUT** `/api/users/{user_id}`
+**Description**: Update user by ID (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `user_id`: ID user (integer)
+
+**Request Body**:
+```json
+{
+  "avatar_type": 1,
+  "name": "string",
+  "username": "string",
+  "address": "string",
+  "dob": "YYYY-MM-DD",
+  "gender": "string"
+}
+```
+
+**Response** (200 OK):
+```json
+{
+  "id": 1,
+  "avatar_type": 1,
+  "name": "string",
+  "username": "string",
+  "address": "string",
+  "dob": "YYYY-MM-DD",
+  "gender": "string",
+  "is_admin": false,
+  "registration_date": "YYYY-MM-DDTHH:MM:SS"
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: User tidak ditemukan
+- `422 Unprocessable Entity`: Data tidak valid
+
+---
+
+#### **DELETE** `/api/users/{user_id}`
+**Description**: Delete user by ID (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `user_id`: ID user (integer)
+
+**Response** (200 OK):
+```json
+{
+  "message": "User deleted successfully"
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: User tidak ditemukan
+
+---
+
+### **6. Admin Children Management (Admin Only)**
+
+#### **GET** `/api/users/children/`
+**Description**: Get all children from all users (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": 1,
+    "name": "string",
+    "gender": "L",
+    "dob": "YYYY-MM-DD",
+    "user_id": 1,
+    "created_at": "YYYY-MM-DDTHH:MM:SS",
+    "updated_at": "YYYY-MM-DDTHH:MM:SS"
+  }
+]
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+
+---
+
+#### **GET** `/api/users/children/{children_id}`
+**Description**: Get children by ID (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `children_id`: ID anak (integer)
+
+**Response** (200 OK):
+```json
+{
+  "id": 1,
+  "name": "string",
+  "gender": "L",
+  "dob": "YYYY-MM-DD",
+  "user_id": 1,
+  "created_at": "YYYY-MM-DDTHH:MM:SS",
+  "updated_at": "YYYY-MM-DDTHH:MM:SS"
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: Anak tidak ditemukan
+
+---
+
+#### **GET** `/api/users/children/user/{user_id}`
+**Description**: Get all children by user ID (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `user_id`: ID user (integer)
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": 1,
+    "name": "string",
+    "gender": "L",
+    "dob": "YYYY-MM-DD",
+    "user_id": 1,
+    "created_at": "YYYY-MM-DDTHH:MM:SS",
+    "updated_at": "YYYY-MM-DDTHH:MM:SS"
+  }
+]
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+
+---
+
+#### **POST** `/api/users/children/`
+**Description**: Create children for any user (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Request Body**:
+```json
+{
+  "name": "string",
+  "gender": "L|P",
+  "dob": "YYYY-MM-DD",
+  "user_id": 1
+}
+```
+
+**Response** (201 Created):
+```json
+{
+  "id": 1,
+  "name": "string",
+  "gender": "L",
+  "dob": "YYYY-MM-DD",
+  "user_id": 1,
+  "created_at": "YYYY-MM-DDTHH:MM:SS",
+  "updated_at": "YYYY-MM-DDTHH:MM:SS"
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `422 Unprocessable Entity`: Data tidak valid
+
+---
+
+#### **PUT** `/api/users/children/{children_id}`
+**Description**: Update children by ID (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `children_id`: ID anak (integer)
+
+**Request Body**:
+```json
+{
+  "name": "string",
+  "gender": "L|P",
+  "dob": "YYYY-MM-DD"
+}
+```
+
+**Response** (200 OK):
+```json
+{
+  "id": 1,
+  "name": "string",
+  "gender": "L",
+  "dob": "YYYY-MM-DD",
+  "user_id": 1,
+  "created_at": "YYYY-MM-DDTHH:MM:SS",
+  "updated_at": "YYYY-MM-DDTHH:MM:SS"
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: Anak tidak ditemukan
+- `422 Unprocessable Entity`: Data tidak valid
+
+---
+
+#### **DELETE** `/api/users/children/{children_id}`
+**Description**: Delete children by ID (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `children_id`: ID anak (integer)
+
+**Response** (200 OK):
+```json
+{
+  "message": "Children deleted successfully"
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: Anak tidak ditemukan
+
+---
+
+### **7. Admin Diagnose Management (Admin Only)**
+
+#### **GET** `/api/users/diagnose/`
+**Description**: Get all diagnose histories from all users (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": 1,
+    "age_on_month": 24,
+    "gender": "L",
+    "height": 85,
+    "result": "Normal",
+    "children_id": 1,
+    "diagnosed_at": "YYYY-MM-DDTHH:MM:SS"
+  }
+]
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+
+---
+
+#### **GET** `/api/users/diagnose/{diagnose_id}`
+**Description**: Get diagnose by ID (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `diagnose_id`: ID diagnosa (integer)
+
+**Response** (200 OK):
+```json
+{
+  "id": 1,
+  "age_on_month": 24,
+  "gender": "L",
+  "height": 85,
+  "result": "Normal",
+  "children_id": 1,
+  "diagnosed_at": "YYYY-MM-DDTHH:MM:SS"
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: Diagnosa tidak ditemukan
+
+---
+
+#### **GET** `/api/users/diagnose/children/{children_id}`
+**Description**: Get all diagnose histories by children ID (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `children_id`: ID anak (integer)
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": 1,
+    "age_on_month": 24,
+    "gender": "L",
+    "height": 85,
+    "result": "Normal",
+    "children_id": 1,
+    "diagnosed_at": "YYYY-MM-DDTHH:MM:SS"
+  }
+]
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+
+---
+
+#### **POST** `/api/users/diagnose/children/{children_id}`
+**Description**: Create diagnose history for any children (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `children_id`: ID anak (integer)
+
+**Request Body**:
+```json
+{
+  "age_on_month": 24,
+  "gender": "L",
+  "height": 85
+}
+```
+
+**Response** (201 Created):
+```json
+{
+  "id": 1,
+  "age_on_month": 24,
+  "gender": "L",
+  "height": 85,
+  "result": "Normal",
+  "children_id": 1,
+  "diagnosed_at": "YYYY-MM-DDTHH:MM:SS"
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: Anak tidak ditemukan
+- `422 Unprocessable Entity`: Data tidak valid
+- `500 Internal Server Error`: ML prediction gagal
+- `503 Service Unavailable`: ML predictor tidak siap
+
+---
+
+#### **DELETE** `/api/users/diagnose/{diagnose_id}`
+**Description**: Delete diagnose history by ID (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `diagnose_id`: ID diagnosa (integer)
+
+**Response** (200 OK):
+```json
+{
+  "message": "Diagnose history deleted successfully"
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: Diagnosa tidak ditemukan
+
+---
+
+#### **GET** `/api/users/diagnose/children/{children_id}/diagnose/{diagnose_id}/report`
+**Description**: Generate PDF report for specific diagnose (Admin only)
+
+**Headers**: `token: <access_token>`
+
+**Authorization**: Requires admin privileges (`is_admin: true`)
+
+**Path Parameters**:
+- `children_id`: ID anak (integer)
+- `diagnose_id`: ID diagnosa (integer)
+
+**Response** (200 OK):
+```json
+{
+  "message": "PDF report generated successfully",
+  "download_url": "http://localhost:8000/reports/diagnose_report_1_20250913_123456_abc12345.pdf",
+  "filename": "diagnose_report_1_20250913_123456_abc12345.pdf",
+  "diagnose_id": 1,
+  "children_id": 1
+}
+```
+
+**Error Responses**:
+- `401 Unauthorized`: Token tidak valid
+- `403 Forbidden`: Admin privileges required
+- `404 Not Found`: Anak atau diagnosa tidak ditemukan
+- `500 Internal Server Error`: Gagal generate PDF report
+
+---
+
+### **8. ML Predictor Status (Public)**
 
 #### **GET** `/api/children/predictor/status`
 **Description**: Cek status ML predictor
@@ -534,7 +1043,7 @@ Diagnosa Medis :
 
 ---
 
-### **6. System Endpoints (Public)**
+### **9. System Endpoints (Public)**
 
 #### **GET** `/`
 **Description**: Root endpoint

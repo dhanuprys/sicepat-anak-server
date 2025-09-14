@@ -92,13 +92,7 @@ def generate_diagnose_report(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Generate PDF report for specific diagnose (Admin only)"""
-    # Check if user is admin
-    if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied. Admin privileges required to generate reports."
-        )
+    """Generate PDF report for specific diagnose"""
     
     try:
         # Verify children belongs to current user

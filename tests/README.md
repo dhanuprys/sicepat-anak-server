@@ -10,6 +10,7 @@ This directory contains comprehensive test scripts for the Stunting Checking App
 
 ### Feature-Specific Tests
 - **`test_admin_features.py`** - Tests for admin-only features (PDF report access control)
+- **`test_admin_endpoints.py`** - Tests for admin endpoints (users/ prefix)
 - **`test_predictor_features.py`** - Tests for ML predictor functionality
 
 ## 🚀 Running Tests
@@ -24,6 +25,9 @@ python tests/test_admin_features.py
 
 # Run ML predictor tests
 python tests/test_predictor_features.py
+
+# Run admin endpoints tests
+python tests/test_admin_endpoints.py
 ```
 
 ### Production Environment
@@ -42,6 +46,7 @@ python tests/test_api_prod.py
 - ✅ **Diagnose System** - Create, list, detail, validation
 - ✅ **ML Predictor** - Status check, various prediction scenarios
 - ✅ **PDF Reports** - Admin-only access control
+- ✅ **Admin Endpoints** - users/ prefix endpoints (admin-only)
 - ✅ **Security** - Unauthorized access, invalid tokens
 
 ### Test Scenarios
