@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
-from typing import List, Optional, Union
-from app.models import User, Children, DiagnoseHistory
-from app.schemas import UserCreate, UserUpdate, ChildrenCreate, ChildrenUpdate, DiagnoseHistoryCreate
+from typing import List, Optional
+from app.models import User
+from app.schemas import UserCreate, UserUpdate
 from app.auth import get_password_hash
 
 
