@@ -5,7 +5,6 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app.api import auth, profile, children, diagnose, users, users_children, users_diagnose
 from app.database import engine
 from app.models import Base
-from app.predictor import initialize_predictor
 from app.config import settings
 
 # Create database tables
@@ -13,7 +12,6 @@ Base.metadata.create_all(bind=engine)
 
 # Initialize stunting predictor
 print("🚀 Starting Stunting Checking App...")
-predictor = initialize_predictor()
 
 # Create FastAPI app
 app = FastAPI(
@@ -38,17 +36,6 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix="/api")
 app.include_router(profile.router, prefix="/api")
-app.include_router(children.router, prefix="/api")
-app.include_router(diagnose.router, prefix="/api")
-
-# Admin-only routers
-app.include_router(users.router, prefix="/api/users", tags=["Admin - Users"])
-app.include_router(users_children.router, prefix="/api/users/children", tags=["Admin - Children"])
-app.include_router(users_diagnose.router, prefix="/api/users/diagnose", tags=["Admin - Diagnose"])
-
-# Mount static files for reports
-app.mount("/reports", StaticFiles(directory=settings.REPORTS_DIR), name="reports")
-
 
 @app.get("/")
 def root():
