@@ -10,7 +10,6 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 # Import your models and database configuration
 from app.database import Base
-from app.models import User, Children, DiagnoseHistory
 from app.config import settings
 
 # this is the Alembic Config object, which provides
