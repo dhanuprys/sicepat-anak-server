@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
-from app.api import auth, profile, children, diagnose, users, users_children, users_diagnose
+from app.api import auth, profile
 from app.database import engine
 from app.models import Base
 from app.config import settings
