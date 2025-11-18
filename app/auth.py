@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from typing import Optional
-import hashlib
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status, Header
@@ -11,28 +10,20 @@ from app.models import User
 from app.schemas import TokenData
 
 # Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use bcrypt_sha256 which handles pre-hashing internally to avoid 72-byte limit
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 # JWT token scheme - using custom header instead of Bearer
 
 
-def _pre_hash_password(password: str) -> str:
-    """Pre-hash password with SHA256 to handle passwords longer than 72 bytes"""
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
-
-
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
-    # Pre-hash the plain password with SHA256 before bcrypt verification
-    pre_hashed = _pre_hash_password(plain_password)
-    return pwd_context.verify(pre_hashed, hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a password"""
-    # Pre-hash with SHA256 to handle passwords longer than 72 bytes
-    pre_hashed = _pre_hash_password(password)
-    return pwd_context.hash(pre_hashed)
+    """Hash a password using bcrypt_sha256 (handles passwords > 72 bytes automatically)"""
+    return pwd_context.hash(password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
