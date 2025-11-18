@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Optional
+import hashlib
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status, Header
@@ -15,14 +16,23 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # JWT token scheme - using custom header instead of Bearer
 
 
+def _pre_hash_password(password: str) -> str:
+    """Pre-hash password with SHA256 to handle passwords longer than 72 bytes"""
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    # Pre-hash the plain password with SHA256 before bcrypt verification
+    pre_hashed = _pre_hash_password(plain_password)
+    return pwd_context.verify(pre_hashed, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
     """Hash a password"""
-    return pwd_context.hash(password)
+    # Pre-hash with SHA256 to handle passwords longer than 72 bytes
+    pre_hashed = _pre_hash_password(password)
+    return pwd_context.hash(pre_hashed)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
