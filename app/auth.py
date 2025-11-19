@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional
+import hashlib
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
 from app.config import settings
@@ -9,21 +10,58 @@ from app.database import get_db
 from app.models import User
 from app.schemas import TokenData
 
-# Password hashing
-# Use bcrypt_sha256 which handles pre-hashing internally to avoid 72-byte limit
-pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
-
 # JWT token scheme - using custom header instead of Bearer
 
+# Bcrypt configuration
+BCRYPT_ROUNDS = 12
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+
+def _pre_hash_password(password: str) -> bytes:
+    """
+    Pre-hash password with SHA256 to handle passwords longer than 72 bytes.
+    Returns raw SHA256 digest (32 bytes) which is well under bcrypt's 72-byte limit.
+    This ensures bcrypt never receives input longer than 72 bytes.
+    """
+    # Encode password to bytes
+    password_bytes = password.encode('utf-8')
+    # Hash with SHA256 to get fixed 32-byte output
+    return hashlib.sha256(password_bytes).digest()
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a password using bcrypt_sha256 (handles passwords > 72 bytes automatically)"""
-    return pwd_context.hash(password)
+    """
+    Hash a password using bcrypt with SHA256 pre-hashing.
+    This handles passwords of any length safely.
+    """
+    # Pre-hash with SHA256 to ensure input is always 32 bytes (under 72-byte limit)
+    pre_hashed = _pre_hash_password(password)
+    # Generate bcrypt hash
+    salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
+    hashed = bcrypt.hashpw(pre_hashed, salt)
+    # Return as string (bcrypt hash is ASCII-safe)
+    return hashed.decode('utf-8')
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Verify a password against its hash.
+    Uses SHA256 pre-hashing to match the hashing process.
+    
+    Note: This implementation uses direct bcrypt (not passlib) to avoid
+    initialization issues. Existing passwords hashed with passlib will need
+    to be reset.
+    """
+    if not plain_password or not hashed_password:
+        return False
+    
+    try:
+        # Pre-hash the plain password
+        pre_hashed = _pre_hash_password(plain_password)
+        # Verify against stored hash
+        return bcrypt.checkpw(pre_hashed, hashed_password.encode('utf-8'))
+    except (ValueError, TypeError, AttributeError):
+        # Handle invalid hash format or other errors
+        return False
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
